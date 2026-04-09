@@ -1,10 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Edit2, X, Code, Monitor, FileText } from 'lucide-react';
 
 const AVAILABLE_REMINDERS = [
   { id: 'leetcode', label: 'LeetCode Contest', icon: Code, color: 'text-[#423eca]', bg: 'bg-[#edf2fe]', border: 'border-[#edf2fe]', dotBg: 'bg-[#423eca]' },
   { id: 'hackathon', label: 'Hackathon', icon: Monitor, color: 'text-[#138847]', bg: 'bg-[#e3f6ea]', border: 'border-[#e3f6ea]', dotBg: 'bg-[#138847]' },
   { id: 'dsbda', label: 'DSBDA Exam', icon: FileText, color: 'text-[#c01d32]', bg: 'bg-[#fce5e8]', border: 'border-[#fce5e8]', dotBg: 'bg-[#c01d32]' }
+];
+
+const HOLIDAYS = {
+  '2026-7-15': 'Independence Day',
+  '2026-0-26': 'Republic Day'
+};
+
+const MONTH_DATA = [
+  { image: "https://images.unsplash.com/photo-1542838686-37ed7a928b03?q=80&w=1000&auto=format&fit=crop", subtitle: "Deep Winter" },
+  { image: "https://images.unsplash.com/photo-1516089851676-e8877e8006ae?q=80&w=1000&auto=format&fit=crop", subtitle: "Late Frost" },
+  { image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1000&auto=format&fit=crop", subtitle: "First Bloom" },
+  { image: "https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?q=80&w=1000&auto=format&fit=crop", subtitle: "Spring Awakening" },
+  { image: "https://images.unsplash.com/photo-1414609245224-afa02bfb3fda?q=80&w=1000&auto=format&fit=crop", subtitle: "Lush Greenery" },
+  { image: "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?q=80&w=1000&auto=format&fit=crop", subtitle: "Early Summer" },
+  { image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop", subtitle: "Ocean Breeze" },
+  { image: "https://images.unsplash.com/photo-1440658172023-e22bd4ce3137?q=80&w=1000&auto=format&fit=crop", subtitle: "Summer Sunsets" },
+  { image: "https://images.unsplash.com/photo-1549880338-65dd4bd84152?q=80&w=1000&auto=format&fit=crop", subtitle: "Crisp Air" },
+  { image: "https://images.unsplash.com/photo-1476837579993-f1d3948f17c2?q=80&w=1000&auto=format&fit=crop", subtitle: "The Peak of Autumn" },
+  { image: "https://images.unsplash.com/photo-1418985991508-e47386d96a71?q=80&w=1000&auto=format&fit=crop", subtitle: "Bare Branches" },
+  { image: "https://images.unsplash.com/photo-1545041042-4fdbbd0de44d?q=80&w=1000&auto=format&fit=crop", subtitle: "Winter Solstice" }
 ];
 
 export default function Calendar() {
@@ -29,8 +49,16 @@ export default function Calendar() {
   const monthName = currentDate.toLocaleString('default', { month: 'long' });
   const monthShort = currentDate.toLocaleString('default', { month: 'short' });
 
-  const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
-  const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+  const handlePrevMonth = () => {
+    setCurrentDate(new Date(year, month - 1, 1));
+    setStartDate(null);
+    setEndDate(null);
+  };
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(year, month + 1, 1));
+    setStartDate(null);
+    setEndDate(null);
+  };
 
   const [currentMode, setCurrentMode] = useState('range');
   const [activeModalDate, setActiveModalDate] = useState(null);
@@ -41,6 +69,27 @@ export default function Calendar() {
   const [dayData, setDayData] = useState({});
   const [modalText, setModalText] = useState('');
   const [modalReminders, setModalReminders] = useState([]);
+  const [newReminderText, setNewReminderText] = useState('');
+
+  const getFormattedDate = (y, m, d) => {
+    return `${y}-${m}-${d}`;
+  };
+
+  const calendarGridRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (currentMode === 'range' && calendarGridRef.current && !calendarGridRef.current.contains(event.target)) {
+        setStartDate(null);
+        setEndDate(null);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [currentMode]);
 
   useEffect(() => {
     const savedData = localStorage.getItem('calendarNotes');
@@ -88,6 +137,13 @@ export default function Calendar() {
     setActiveModalDate(null);
   };
 
+  const handleAddReminder = () => {
+    if (newReminderText.trim()) {
+      setModalReminders(prev => [...prev, newReminderText.trim()]);
+      setNewReminderText('');
+    }
+  };
+
   const toggleReminder = (id) => {
     setModalReminders(prev => 
       prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
@@ -110,13 +166,13 @@ export default function Calendar() {
           
           <div className="relative rounded-xl overflow-hidden shadow-sm aspect-square bg-slate-200">
             <img 
-              src="https://images.unsplash.com/photo-1549880338-65dd4bd84152?q=80&w=1000&auto=format&fit=crop" 
-              alt="Mountain Landscape" 
+              src={MONTH_DATA[month].image} 
+              alt="Dynamic Month Landscape" 
               className="w-full h-full object-cover" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex flex-col justify-end p-5">
               <h1 className="text-white text-3xl font-bold tracking-tight leading-tight mb-1">{monthName} {year}</h1>
-              <p className="text-white/70 text-[10px] font-semibold tracking-[0.15em] uppercase">The Peak of Autumn</p>
+              <p className="text-white/70 text-[10px] font-semibold tracking-[0.15em] uppercase">{MONTH_DATA[month].subtitle}</p>
             </div>
           </div>
 
@@ -170,6 +226,9 @@ export default function Calendar() {
                     </button>
                     <p className="text-white/60 text-[10px] font-bold tracking-[0.15em] uppercase mb-1">{getDayName(activeModalDate)}</p>
                     <h2 className="text-white text-4xl font-bold tracking-tight">{monthShort} {activeModalDate}</h2>
+                    {HOLIDAYS[getFormattedDate(year, month, activeModalDate)] && (
+                      <p className="text-red-500 text-[13px] font-bold mt-1">✨ {HOLIDAYS[getFormattedDate(year, month, activeModalDate)]}</p>
+                    )}
                   </div>
 
                   <div className="p-6 pt-5 flex flex-col gap-5">
@@ -203,6 +262,32 @@ export default function Calendar() {
                               </button>
                             );
                           })}
+                          {modalReminders.filter(id => !AVAILABLE_REMINDERS.some(r => r.id === id)).map((text, idx) => (
+                            <button
+                              key={`custom-${idx}`}
+                              onClick={() => toggleReminder(text)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-bold border transition-colors focus:outline-none bg-[#f1f3f5] text-slate-600 border-transparent hover:bg-[#e9ecef]"
+                            >
+                               <X size={10} strokeWidth={2.5} /> {text}
+                            </button>
+                          ))}
+                       </div>
+                       
+                       <div className="flex gap-2.5 mt-2">
+                         <input 
+                           type="text" 
+                           placeholder="Add custom reminder..." 
+                           value={newReminderText}
+                           onChange={(e) => setNewReminderText(e.target.value)}
+                           onKeyDown={(e) => e.key === 'Enter' && handleAddReminder()}
+                           className="flex-1 bg-white border border-slate-200/80 rounded-md px-3 py-1.5 text-[11px] text-slate-700 outline-none focus:border-indigo-400"
+                         />
+                         <button 
+                           onClick={handleAddReminder} 
+                           className="bg-slate-800 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-slate-700 transition"
+                         >
+                           Add
+                         </button>
                        </div>
                     </div>
 
@@ -233,7 +318,7 @@ export default function Calendar() {
               ))}
             </div>
 
-            <div className="grid grid-cols-7 flex-1 border-t border-l border-gray-200 w-[calc(100%+1px)] -ml-[1px]">
+            <div ref={calendarGridRef} className="grid grid-cols-7 flex-1 border-t border-l border-gray-200 w-[calc(100%+1px)] -ml-[1px]">
               {emptyDays.map(i => (
                 <div key={`empty-${i}`} className="bg-[#e5eaf2]/30 border-r border-b border-gray-200"></div>
               ))}
@@ -246,6 +331,10 @@ export default function Calendar() {
                 const data = dayData[date];
                 const hasNotes = data?.text?.trim()?.length > 0;
                 const activeRems = data?.reminders || [];
+
+                const currentDateFormatted = getFormattedDate(year, month, date);
+                const holidayName = HOLIDAYS[currentDateFormatted];
+                const isSunday = new Date(year, month, date).getDay() === 0;
 
                 const todayObj = new Date();
                 const isToday = 
@@ -267,11 +356,11 @@ export default function Calendar() {
                   <div 
                     key={date} 
                     onClick={() => handleDateClick(date)}
-                    className={`min-h-[85px] border-r border-b border-gray-200 flex flex-col p-3 pb-2 cursor-pointer transition-colors ${cellClasses}`}
+                    className={`min-h-[85px] border-r border-b border-gray-200 flex flex-col p-3 pb-2 cursor-pointer transition-colors relative ${cellClasses}`}
                   >
-                    <span className={`text-[13px] ${isToday && !isStart && !isEnd ? 'font-extrabold' : 'font-semibold'}`}>{date}</span>
+                    <span className={`text-[13px] ${isToday && !isStart && !isEnd ? 'font-extrabold' : 'font-semibold'} ${isSunday || holidayName ? 'text-red-500' : ''}`}>{date}</span>
                     
-                    <div className="flex justify-start gap-1 w-full mt-1.5 flex-1 items-end pb-0.5">
+                    <div className="flex justify-start gap-1 w-full mt-1.5 mb-1 flex-wrap">
                        {hasNotes && <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>}
                        {activeRems.map(remId => {
                          const rem = AVAILABLE_REMINDERS.find(r => r.id === remId);
@@ -279,6 +368,12 @@ export default function Calendar() {
                          return <div key={remId} className={`w-1.5 h-1.5 rounded-full ${rem.dotBg}`}></div>;
                        })}
                     </div>
+
+                    {holidayName && (
+                      <div className="text-[8px] text-red-500 font-bold leading-none truncate w-full mt-auto tracking-tight">
+                        {holidayName}
+                      </div>
+                    )}
                   </div>
                 );
               })}
