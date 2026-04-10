@@ -1,16 +1,33 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Interactive Wall Calendar
 
-Currently, two official plugins are available:
+A feature-rich, minimalist interactive wall calendar built with React and Tailwind CSS. Developed as a frontend engineering submission.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+* **Dynamic UI:** Responsive grid layout with dynamic month landscapes and subtitles.
+* **Interaction Modes:** Toggle between "Range Selection" for highlighting dates and "Notepad Mode" for daily journaling.
+* **Daily Notes & Reminders:** Click any date in Notepad Mode to add persistent daily notes and custom reminders.
+* **Data Persistence:** Automatically saves all notes and reminders to `localStorage`.
+* **Visual Indicators:** Highlights the current date, marks Sundays and holidays in red, and displays subtle dots for days with saved data.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+* **Framework:** React + Vite
+* **Styling:** Tailwind CSS
+* **Icons:** Lucide React
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Local Development
+
+1. Clone the repository:
+   `git clone https://github.com/VinayakGawade009/calender.git`
+2. Navigate into the directory:
+   `cd calender`
+3. Install dependencies:
+   `npm install`
+4. Start the development server:
+   `npm run dev`
+
+## 🌐 Deployment
+
+The project is configured for seamless deployment on Vercel or Netlify using the default Vite build commands (`npm run build`).
